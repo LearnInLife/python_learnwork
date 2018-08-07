@@ -1,6 +1,7 @@
 
 
-1. 在多继承的时候，调用super(type, obj_or_type) 会按照 MRO 的顺序去委托 type 的 父类 或 兄弟类 的方法来调用
+1. 
+在多继承的时候，调用super(type, obj_or_type) 会按照 MRO 的顺序去委托 type 的 父类 或 兄弟类 的方法来调用
 比如：
 ProxyCheck类在初始化时，如果调用super(ProxyCheck,self).__init()__,
 初始化调用的是MRO顺序中的ProxyCheck类下一个类,如果父类不调用__init()__，则不会继续调用后面的__init()__
