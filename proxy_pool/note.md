@@ -93,7 +93,8 @@
    * 如果元类中定义了`__call__`，此方法必须返回一个对象，否则类的实例化就不会起作用。（实例化得到的结果为`__call__`的返回值）
    *  如果元类的`__call__`中返回type.`__call__`(cls, *args, **kwargs)，type创建的对象,里面会调用定义类的`__new__`方法,和`__init__`方法
 
-   ```
+   
+   ```python
    class Meta(type):
        def __new__(cls, *args, **kwargs):
            print('meta __new__')
