@@ -1,5 +1,3 @@
-
-
 ## 注意点
 
 1. 在多继承的时候，调用super(type, obj_or_type) 会按照 MRO 的顺序去委托 type 的 父类 或 兄弟类 的方法来调用
@@ -73,13 +71,16 @@
 
 7. 如何理解类装饰器LazyProperty
 
-class A(object):
-    @LazyProperty
-    def fuc():
-        pass
+   ```python
+   class A(object):
+   
+       @LazyProperty
+       def fuc():
+           pass
+   
+   ```
 
-相当于，类A中的 方法func变为了 LazyProperty(fuc)，类LazyProperty作为了A中的一个属性值
-如果调用 A.fuc 则会相应调用LazyProperty的`__get__`方法，得到其返回值
+   相当于，类A中的 方法func变为了 LazyProperty(fuc)，类LazyProperty作为了A中的一个属性值如果调用 A.fuc 则会相应调用LazyProperty的`__get__`方法，得到其返回值
 
 
 
@@ -87,43 +88,45 @@ class A(object):
 
    元类中有一个特殊的方法`__call__`，这个方法会截断类的`__new__`和`__init__`方法,阻止其执行`__call__`应该返回实例，和类的`__new__`方法返回的一样。
 
-6.1 如果元类中定义了`__call__`，此方法必须返回一个对象，
-否则类的实例化就不会起作用。（实例化得到的结果为`__call__`的返回值）
-6.2 如果元类的`__call__`中返回type.`__call__`(cls, *args, **kwargs),
-type创建的对象,里面会调用定义类的`__new__`方法,和`__init__`方法
+   
 
-```
-class Meta(type):
-    def __new__(cls, *args, **kwargs):
-        print('meta __new__')
-        return type.__new__(cls, *args, **kwargs)
+   * 如果元类中定义了`__call__`，此方法必须返回一个对象，否则类的实例化就不会起作用。（实例化得到的结果为`__call__`的返回值）
+   *  如果元类的`__call__`中返回type.`__call__`(cls, *args, **kwargs)，type创建的对象,里面会调用定义类的`__new__`方法,和`__init__`方法
 
-    def __init__(cls, *args, **kwargs):
-        print('meta __init__')
+   ```
+   class Meta(type):
+       def __new__(cls, *args, **kwargs):
+           print('meta __new__')
+           return type.__new__(cls, *args, **kwargs)
+   
+       def __init__(cls, *args, **kwargs):
+           print('meta __init__')
+   
+       def __call__(cls, *args, **kwargs):
+           print('meta __call__')
+           # obj = cls.__new__(cls, *args, **kwargs)
+           # cls.__init__(obj, *args, **kwargs)  # Foo.__init__(obj)
+           return super(Meta, cls).__call__(*args, **kwargs)
+   
+   
+   class Foo(object, metaclass=Meta):
+       def __init__(self):
+           print("Foo __init__")
+   
+       def __new__(cls, *args, **kwargs):
+           print('Foo __new__')
+           return object.__new__(cls)
+   
+   
+   Foo()
+   ```
 
-    def __call__(cls, *args, **kwargs):
-        print('meta __call__')
-        # obj = cls.__new__(cls, *args, **kwargs)
-        # cls.__init__(obj, *args, **kwargs)  # Foo.__init__(obj)
-        return super(Meta, cls).__call__(*args, **kwargs)
+   ```
+   meta __new__
+   meta __init__
+   meta __call__
+   Foo __new__
+   Foo __init__
+   ```
 
-
-class Foo(object, metaclass=Meta):
-    def __init__(self):
-        print("Foo __init__")
-
-    def __new__(cls, *args, **kwargs):
-        print('Foo __new__')
-        return object.__new__(cls)
-
-
-Foo()
-```
-```
-meta __new__
-meta __init__
-meta __call__
-Foo __new__
-Foo __init__
-```
-Foo类中，如果`__new__`方法不返回实体，则`__init__`方法不会被调用
+   Foo类中，如果`__new__`方法不返回实体，则`__init__`方法不会被调用
